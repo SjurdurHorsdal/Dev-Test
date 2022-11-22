@@ -16,3 +16,4 @@
 6. then enter the command **yarn dev** in the terminal, if everything is fine, the answer will come that server listening on the port 3001
 7. if everything starts, you can go to the browser and test
 8. To view the database, you can use DB Browser and open the **database.sqlite** file which is in the backend folder
+
