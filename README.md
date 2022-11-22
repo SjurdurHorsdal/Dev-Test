@@ -11,7 +11,7 @@
 1. Grab code from Github - open repository in the browser, then press Code - Download zip and unzip the files
 2. Go to the frontend folder and in the terminal type **npm install**, wait for the command to be processed
 3. Enter the **npm run dev** command. The terminal will give us the address of the frontend application, **sample: http://localhost:5173/**, open this address in the browser
-4. Open a new terminal, go to the backend folder and type **npm install** in the terminal
+4. Open a new terminal, go to the backend folder and type **npm install --force** in the terminal
 5. Find the .env file in the backend folder and check the ORIGIN_HOST variable, it must be exactly the same as the address in the browser
 6. Enter the command **npm run dev** in the terminal. If everything is fine, the terminal will show that the server is listening on the port 3001
 7. If everything starts, you can go to the browser and test
