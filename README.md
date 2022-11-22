@@ -8,7 +8,7 @@
 
 **How to start?**
 
-1. Grab changes from git/download archive and unzip the files
+1. Grab code from Github - open repository in the browser, then press Code - Download zip and unzip the files
 2. Go to the frontend folder and in the terminal type **yarn**, wait for the command to be processed
 3. Enter the **yarn dev** command. The terminal will give us the address of the frontend application, **sample: http://localhost:5173/**, open this address in the browser
 4. Open a new terminal, go to the backend folder and type **yarn** in the terminal
