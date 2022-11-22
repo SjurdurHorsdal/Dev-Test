@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "target": "ES6",
+        "module": "commonjs",
+        "outDir": "./dist",
+        "baseUrl": "./src"
+    },
+    "include": [
+        "src/**/*.ts", 
+        "src/config/sequelize.js"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
