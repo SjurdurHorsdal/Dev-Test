@@ -17,7 +17,7 @@ class App {
         ],
         credentials: true,
         methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-        origin: 'http://127.0.0.1:5173',
+        origin: process.env.ORIGIN_HOST,
         preflightContinue: false
     };
 
