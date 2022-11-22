@@ -2,6 +2,8 @@
 
 [install nodejs (version 16.0.0 or higher)](https://nodejs.org/en/) (we recommended to install LTS version)
 
+After installing nodej, open a terminal and type **npm install --global yarn**
+
 **Optional setup environment**
 
 [DB Browser](https://sqlitebrowser.org/dl/) to make it convenient to view what is stored in the database
