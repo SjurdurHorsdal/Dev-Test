@@ -13,9 +13,9 @@ const sequelize = new Sequelize(dbConfig.database!, dbConfig.username!, dbConfig
 })
 
 const modelInitialize = [
+  Users,
   Organizations,
   Rooms,
-  Users
 ];
 
 for(const model of modelInitialize) {
@@ -23,9 +23,11 @@ for(const model of modelInitialize) {
 }
 
 const {
+  users,
   organizations,
-  rooms
+  rooms,
 } = sequelize.models;
+
 
 organizations.hasMany(rooms, {
   foreignKey: {
@@ -35,6 +37,20 @@ organizations.hasMany(rooms, {
 });
 
 rooms.belongsTo(organizations, {
+  foreignKey: {
+    allowNull: false
+  },
+  onDelete: 'CASCADE'
+});
+
+users.hasMany(organizations, {
+  foreignKey: {
+    allowNull: false
+  },
+  onDelete: 'CASCADE'
+});
+
+organizations.belongsTo(users, {
   foreignKey: {
     allowNull: false
   },
