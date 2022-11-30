@@ -13,7 +13,8 @@ class App {
             'Content-Type',
             'Accept',
             'X-Access-Token',
-            'Authorization'
+            'Authorization',
+            'x-token'
         ],
         credentials: true,
         methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
