@@ -1,4 +1,6 @@
 import { Request, Response, Router } from "express";
+import { body, validationResult } from "express-validator";
+
 import Controller from "../../interfaces/controller.interface";
 import { authJwt } from "../../middlewares/auth.middleware";
 import RoomsService from "./rooms.service";
@@ -16,7 +18,13 @@ class RoomsController implements Controller{
     private initializeRoutes() {
         this.router.get(`${this.path}`, this.getRooms);
         this.router.get(`${this.path}/get-by-organization`, this.getRoomsByOrganization);
-        this.router.post(`${this.path}/create`, authJwt, this.createRoom);
+        this.router.post(
+            `${this.path}/create`,
+            authJwt,
+            body('name').notEmpty().withMessage('name cannot be empty'),
+            body('organizationId').notEmpty().withMessage('organizationId cannot be empty'),
+            this.createRoom
+        );
         this.router.patch(`${this.path}/update/:id`, authJwt, this.updateRoom);
         this.router.delete(`${this.path}/delete/:id`, authJwt, this.deleteRoom);
     }
@@ -32,6 +40,10 @@ class RoomsController implements Controller{
     }
 
     public createRoom = async (request: Request, response: Response) => {
+        const errors = validationResult(request);
+        if(!errors.isEmpty()) {
+            return response.status(400).json({ errors: errors.array() });
+        }
         const isCreated = await this.roomsService.createRoom(request.body);
         response.send(isCreated);
     }

@@ -4,6 +4,7 @@ import sequelize from '../../models';
 
 class RoomsService {
     private roomsModel = sequelize.models.rooms;
+    private organizationModel = sequelize.models.organizations;
 
     public getRooms = async () => {
         try {
@@ -31,6 +32,10 @@ class RoomsService {
 
     public createRoom = async (dto: CreateRoomDto) => {
         try {
+            const isOrganizationExisted = await this.organizationModel.findByPk(dto.organizationId);
+            if(!isOrganizationExisted) {
+                return 'organization doesnot existed';
+            }
             const createdRoom = await this.roomsModel.create({
                 ...dto
             });

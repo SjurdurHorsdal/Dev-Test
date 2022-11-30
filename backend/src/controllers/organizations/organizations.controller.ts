@@ -1,4 +1,6 @@
 import { Request, Response, Router } from "express";
+import { body, validationResult } from "express-validator";
+
 import Controller from "../../interfaces/controller.interface";
 import { authJwt } from "../../middlewares/auth.middleware";
 import OrganizationsService from "./organizations.service";
@@ -15,18 +17,31 @@ class OrganizationsController implements Controller{
 
     private initializeRoutes() {
         this.router.get(`${this.path}`, this.getOrganizations);
-        this.router.post(`${this.path}/create`, authJwt, this.createOrganization);
+        this.router.post(
+            `${this.path}/create`, 
+            authJwt, body('name').notEmpty().withMessage('name cannot be empty'),
+            this.createOrganization
+        );
         this.router.patch(`${this.path}/update/:id`, authJwt, this.updateOrganization);
         this.router.delete(`${this.path}/delete/:id`, authJwt, this.deleteOrganization);
     }
 
     public getOrganizations = async (request: Request, response: Response) => {
-        const organizations = await this.organizationsService.getOrganizations();
+        const token = request.headers['x-token'] as string;
+        if(!token) {
+            return response.status(400).send('token not provided');
+        }
+        const organizations = await this.organizationsService.getOrganizations(token);
         response.send(organizations);
     }
 
     public createOrganization = async (request: Request, response: Response) => {
-        const createdOrganization = await this.organizationsService.createOrganization(request.body);
+        const token = request.headers['authorization'].split(' ')[1] as string;
+        const errors = validationResult(request);
+        if(!errors.isEmpty()) {
+            return response.status(400).json({ errors: errors.array() });
+        }
+        const createdOrganization = await this.organizationsService.createOrganization(request.body, token);
         response.send(createdOrganization);
     }
 
