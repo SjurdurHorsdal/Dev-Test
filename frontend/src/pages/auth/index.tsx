@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
-import {useNavigate} from 'react-router-dom';
 
 import useStore, { Store } from "../../store/store";
 import styles from './Auth.module.scss';
@@ -13,7 +12,6 @@ type IAuthCredentials = {
 const Auth: React.FC = () => {
     const signUp = useStore((state: Store) => state.signUp);
     const signIn = useStore((state: Store) => state.signIn);
-    const navigate = useNavigate();
 
     const [authCredentials, setAuthCredentials] = React.useState<IAuthCredentials>({login: '', password: ''});
 
@@ -27,12 +25,10 @@ const Auth: React.FC = () => {
 
     const handleOnSingUp = async () => {
         await signUp(authCredentials);
-        navigate('/organizations');
     }
 
     const handleOnSignIn = async () => {
         await signIn(authCredentials);
-        navigate('/organizations');
     }
 
     const isDisabledFields = () => {

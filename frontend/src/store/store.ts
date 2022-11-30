@@ -1,6 +1,7 @@
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 import create from 'zustand';
 import { Api } from '../api';
-import { AuthPayload, CreateOrganizationDto, CreateRoomDto, Organizations, Rooms, UpdateOrganizationDto, UpdateRoomDto } from '../api/interfaces';
+import { AuthPayload, CreateOrganizationDto, CreateRoomDto, Organizations, Rooms, UpdateOrganizationDto, UpdateRoomDto, UserInfo } from '../api/interfaces';
 
 const apiClient = new Api();
 
@@ -10,7 +11,7 @@ export interface Store {
     isRefetch: boolean;
     signUp: (dto: AuthPayload) => Promise<void>;
     signIn: (dto: AuthPayload) => Promise<void>;
-    verifyToken: (token: string) => Promise<void>;
+    verifyToken: (token: string) => Promise<boolean>;
 
     organizations: Organizations[];
     rooms: Rooms[];
@@ -31,6 +32,12 @@ export interface Store {
 
     updateRoom: (dto: UpdateRoomDto, id: string) => Promise<void>;
     updateOrganization: (dto: UpdateOrganizationDto, id: string) => Promise<void>;
+    clearRoomsData: () => void;
+
+    userInfo: UserInfo;
+
+    getUserByToken: () => Promise<void>;
+    logout: (navigate: NavigateFunction) => void;
 }
 
 const useStore = create<Store>(set => ({
@@ -43,6 +50,8 @@ const useStore = create<Store>(set => ({
 
     fetchActualRooms: '',
     fetchActualOrganizations: '',
+
+    userInfo: {} as UserInfo,
 
     setFetchActualRooms: (id: string) => set({fetchActualRooms: id}),
 
@@ -58,12 +67,18 @@ const useStore = create<Store>(set => ({
     },
     verifyToken: async (token: string) => {
         const data = await apiClient.verifyToken(token);
-        set({isValidToken: data})
+        set({isValidToken: data});
+        return data;
     },
 
     fetchOrganizations: async () => {
-        const data = await apiClient.fetchOrganizations();
+        const token = window.localStorage.getItem('token');
+        if(!token) {
+            return;
+        }
+        const data = await apiClient.fetchOrganizations(token);
         set({organizations: data});
+        set((state) => (state.fetchActualRooms ? {fetchActualRooms: ''} : {fetchActualRooms: state.fetchActualRooms}));
     },
     fetchRoomsByOrgId: async (id: string) => {
         const data = await apiClient.fetchRoomsByOrgId(id);
@@ -109,6 +124,23 @@ const useStore = create<Store>(set => ({
             set((state) => ({isRefetch: !state.isRefetch}));
         }
     },
+
+    clearRoomsData: () => {
+        set({rooms: [], fetchActualRooms: ''});
+    },
+
+    getUserByToken: async () => {
+        const data = await apiClient.getUserByToken();
+        if(data) {
+            set({userInfo: data})
+        }
+    },
+
+    logout: (navigate) => {
+        window.localStorage.removeItem('token');
+        set({userInfo: {} as UserInfo});
+        navigate('/');
+    }
 }));
 
 export default useStore;

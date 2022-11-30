@@ -17,7 +17,7 @@ const PrimaryDropdown: React.FC<Props> = ({
 
     return (
         <div>
-            <Dropdown options={options} value={value} onChange={onChange} className={styles.dropdown} />
+            <Dropdown options={options} value={decodeURIComponent(value)} onChange={onChange} className={styles.dropdown} />
         </div>
     );
 } 

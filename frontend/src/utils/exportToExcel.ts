@@ -1,7 +1,6 @@
-import React from 'react'
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import { Organizations } from '../api/interfaces';
+import { Organizations, Rooms } from '../api/interfaces';
 
 export const ExportToExcelUtil = (data: Organizations[], filename: string) => {
     const normalizedData = data.map((org) => {
@@ -10,7 +9,7 @@ export const ExportToExcelUtil = (data: Organizations[], filename: string) => {
             name: org.name,
             createdAt: org.createdAt,
             updatedAt: org.updatedAt,
-            rooms: JSON.stringify(org.rooms)
+            rooms: org.rooms.map((room: Rooms) => (room.name)).join(', ')
         }
     });
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";

@@ -12,15 +12,19 @@ export class Api {
         return data;
     };
 
-    verifyToken = async (token: string) => {
+    verifyToken = async (token: string): Promise<boolean> => {
         const { data } = await client.post('/auth/verify', {
             token: token
         });
         return data; 
     };
 
-    fetchOrganizations = async () => {
-        const { data } = await client.get('/organizations');
+    fetchOrganizations = async (token: string) => {
+        const { data } = await client.get('/organizations', {
+            headers: {
+                'x-token': token
+            }
+        });
         return data;
     };
 
@@ -87,6 +91,15 @@ export class Api {
         const { data } = await client.delete(`/organizations/delete/${id}`, {
             headers: {
                 'Authorization': `Bearer ${window.localStorage.getItem('token')}`
+            }
+        });
+        return data;
+    };
+
+    getUserByToken = async () => {
+        const { data } = await client.get('/user/get-by-token', {
+            headers: {
+                'x-token': window.localStorage.getItem('token')
             }
         });
         return data;

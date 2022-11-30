@@ -1,10 +1,11 @@
 import React from "react";
 import { Option } from "react-dropdown";
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
-import { Organizations, Rooms } from "../../api/interfaces";
-import PrimaryDropdown from "../../components/Dropdown/PrimaryDropdown";
-import useStore, { Store } from "../../store/store";
+import { Button, Label, Input } from 'reactstrap';
+import { useLocation } from "react-router-dom";
 
+import { Organizations, Rooms } from "../../api/interfaces";
+import PrimaryDropdown from "../../ui-components/Dropdown/PrimaryDropdown";
+import useStore, { Store } from "../../store/store";
 import Item from "./components/Item";
 import styles from './Rooms.module.scss';
 
@@ -24,8 +25,12 @@ export interface IToggleEdit {
 
 
 const RoomsPage: React.FC = () => {
+    const location = useLocation();
+
     const rooms = useStore((state: Store) => state.rooms);
     const organizations = useStore((state: Store) => state.organizations);
+
+    const clearRoomsData = useStore((state: Store) => state.clearRoomsData);
 
     const fetchRoomsByOrgId = useStore((state: Store) => state.fetchRoomsByOrgId);
     const fetchOrganizations = useStore((state: Store) => state.fetchOrganizations);
@@ -43,27 +48,43 @@ const RoomsPage: React.FC = () => {
     const [savePayload, setSavePayload] = React.useState<ISavePayload>({name: '', organizationId: ''});
     const [editPayload, setEditPayload] = React.useState<IEditPayload>({name: ''});
     const [isEdit, setIsEdit] = React.useState<IToggleEdit>({isEdit: false, id: ''});
+    const [defaultDropdownValue, setDefaultDropdownValue] = React.useState<string>('');
 
     React.useEffect(() => {
-        fetchOrganizations();
+        let orgId = '';
+        let orgName = '';
+
+        if(location.search) {
+            orgId = location.search.split('&')[0].split('=')[1];
+            orgName = location.search.split('&')[1].split('=')[1];
+        }
+
+        if(orgId && orgName) {
+            setFetchActualRooms(orgId);
+            setDefaultDropdownValue(orgName);
+            setSavePayload({...savePayload, organizationId: orgId});
+        } else {
+            clearRoomsData();
+            fetchOrganizations();
+        }
     }, [])
 
     React.useEffect(() => {
         if(isFetchActualRooms) {
             fetchRoomsByOrgId(isFetchActualRooms);
-        } else {
+        } else if(savePayload.organizationId) {
             fetchRoomsByOrgId(savePayload.organizationId);
-        }
+        } 
     }, [isFetchActualRooms, isRefetch])
 
     const handleDropdownOnChange = (option: Option) => {
         setSavePayload({...savePayload, organizationId: option.value});
         setFetchActualRooms(option.value);
-        fetchRoomsByOrgId(option.value);
     };
 
     const handleOnSaveCreatedRoom = () => {
         saveRoom(savePayload);
+        setSavePayload({...savePayload, name: ''});
     };
 
     const handleOnChangeCreateRoom = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +95,13 @@ const RoomsPage: React.FC = () => {
         deleteRoom(id);
     };
 
-    const handleOnSave = (id: string) => {
+    const handleOnSave = (id: string, name: string) => {
+        if(editPayload.name === '') {
+            setEditPayload({name: name});
+            updateRoom({name: name}, id);
+            setIsEdit({isEdit: !isEdit.isEdit, id: id});
+            return;
+        } 
         setEditPayload({...editPayload});
         updateRoom({...editPayload}, id);
         setIsEdit({isEdit: !isEdit.isEdit, id: id});
@@ -86,7 +113,7 @@ const RoomsPage: React.FC = () => {
 
     const toggleEdit = (id: string) => {
         setIsEdit({isEdit: !isEdit.isEdit, id: id});
-    }
+    };
 
     return (
         <div className={styles.container}>
@@ -97,20 +124,22 @@ const RoomsPage: React.FC = () => {
                 <div className={styles['content--row']}>
                     <PrimaryDropdown 
                         options={organizations.map((org: Organizations) => {return {label: org.name, value: org.id}})}
-                        value={''}
+                        value={defaultDropdownValue}
                         onChange={handleDropdownOnChange} 
                     />
                 </div>
-                <div className={styles['content-scrolled']}>
+                <div className={styles['content-scrolled']} style={{
+                        overflowY: rooms.length >= 4 ? 'scroll' : 'hidden'
+                    }}>
                     {rooms ? 
                         rooms.map((room: Rooms) => {
                             return (
-                                <div className={styles['content-scrolled--row']} id={room.id}>
+                                <div className={styles['content-scrolled--row']} key={room.id}>
                                     <Item 
                                         id={room.id}
                                         label={room.name}
                                         isEdit={isEdit}
-                                        onSave={() => handleOnSave(room.id)}
+                                        onSave={() => handleOnSave(room.id, room.name)}
                                         onChangeEdit={handleOnChangeEdit}
                                         onDelete={() => handleOnDelete(room.id)}
                                         toggleEdit={() => toggleEdit(room.id)}
@@ -123,7 +152,12 @@ const RoomsPage: React.FC = () => {
                 <div className={styles['content--row']}>
                     <Label>Create New Room</Label>
                     <Input type="text" onChange={handleOnChangeCreateRoom} value={savePayload.name} />
-                    <Button onClick={handleOnSaveCreatedRoom} disabled={savePayload.name ? false : true}>Save</Button>
+                    <Button 
+                        onClick={handleOnSaveCreatedRoom}
+                        disabled={(savePayload.name && savePayload.organizationId) ? false : true}
+                    >
+                    Save
+                    </Button>
                 </div>
             </div>
         </div>

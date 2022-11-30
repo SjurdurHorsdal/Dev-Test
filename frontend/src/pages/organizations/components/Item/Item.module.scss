@@ -7,3 +7,12 @@
         gap: 12px;
     }
 }
+
+.edit-wrapper {
+    display: flex;
+    gap: 12px;
+
+    img {
+        cursor: pointer;
+    }
+}

@@ -18,30 +18,4 @@ body {
     min-height: 90vh;
     border-radius: 36px;
     margin: 2.5%;
-
-    .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 24px;
-
-        &--item {
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: 600;
-
-            a {
-                text-decoration: none;
-                color: black;
-            }
-
-            &:hover {
-                cursor: pointer;
-                padding: 12px;
-                border-radius: 12px;
-                background: white;
-                transition: all 0.5s ease-in-out;
-            }
-        }
-    }
 }

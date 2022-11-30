@@ -33,3 +33,9 @@ export interface UpdateRoomDto {
 export interface UpdateOrganizationDto {
     name: string;
 };
+
+export interface UserInfo {
+    id: string;
+    login: string;
+    password: string;
+}

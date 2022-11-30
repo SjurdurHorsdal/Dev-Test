@@ -1,6 +1,7 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from './Organizations.module.scss';
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import { Button, Label, Input } from 'reactstrap';
 import Item from "./components/Item";
 import useStore, { Store } from "../../store/store";
 import { Organizations } from "../../api/interfaces";
@@ -10,7 +11,7 @@ interface ISavePayload {
     name: string;
 }
 
-interface IEditPayload {
+export interface IEditPayload {
     name: string;
 }
 
@@ -20,8 +21,11 @@ export interface IToggleEdit {
 }
 
 const OrganizationsPage: React.FC = () => {
+    const navigate = useNavigate();
+
     const organizations = useStore((state: Store) => state.organizations);
     const fetchOrganizations = useStore((state: Store) => state.fetchOrganizations);
+    const getUserByToken = useStore((state: Store) => state.getUserByToken);
 
     const updateOrganization = useStore((state: Store) => state.updateOrganization);
 
@@ -36,6 +40,7 @@ const OrganizationsPage: React.FC = () => {
 
     React.useEffect(() => {
         fetchOrganizations();
+        getUserByToken();
     }, [])
 
     React.useEffect(() => {
@@ -44,6 +49,7 @@ const OrganizationsPage: React.FC = () => {
 
     const handleOnSaveCreatedOrg = () => {
         saveOrganization(savePayload);
+        setSavePayload({name: ''});
     };
 
     const handleOnChangeCreateOrg  = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +60,13 @@ const OrganizationsPage: React.FC = () => {
         deleteOrganization(id);
     };
 
-    const handleOnSave = (id: string) => {
+    const handleOnSave = (id: string, name: string) => {
+        if(editPayload.name === '') {
+            setEditPayload({name: name});
+            updateOrganization({name: name}, id);
+            setIsEdit({isEdit: !isEdit.isEdit, id: id});
+            return;
+        } 
         setEditPayload({...editPayload});
         updateOrganization({...editPayload}, id);
         setIsEdit({isEdit: !isEdit.isEdit, id: id});
@@ -66,7 +78,11 @@ const OrganizationsPage: React.FC = () => {
 
     const toggleEdit = (id: string) => {
         setIsEdit({isEdit: !isEdit.isEdit, id: id});
-    }
+    };
+
+    const onLabelClick = (id: string, name: string) => {
+        navigate(`/rooms?id=${id}&name=${name}`);
+    };
 
     return (
         <div className={styles.container}>
@@ -74,20 +90,23 @@ const OrganizationsPage: React.FC = () => {
                 Properties
             </div>
             <div className={styles.content}>
-                <div className={styles['content-scrolled']}>
+                <div className={styles['content-scrolled']} style={{
+                        overflowY: organizations.length >= 5 ? 'scroll' : 'hidden'
+                    }}>
                     {
                     organizations ? 
                     organizations.map((org: Organizations) => {
                         return (
-                            <div className={styles['content-scrolled--row']} id={org.id}>
+                            <div className={styles['content-scrolled--row']} key={org.id}>
                                 <Item 
                                     id={org.id}
                                     label={org.name}
                                     isEdit={isEdit}
-                                    onSave={() => handleOnSave(org.id)}
+                                    onSave={() => handleOnSave(org.id, org.name)}
                                     onChangeEdit={handleOnChangeEdit}
                                     onDelete={() => handleOnDelete(org.id)}
                                     toggleEdit={() => toggleEdit(org.id)}
+                                    onLabelClick={() => onLabelClick(org.id, org.name)}
                                 />
                             </div>
                         );
@@ -97,7 +116,7 @@ const OrganizationsPage: React.FC = () => {
                 </div>
                 <div className={styles['content--row']}>
                     <Label>Create New Property</Label>
-                    <Input type="text" onChange={handleOnChangeCreateOrg}/>
+                    <Input type="text" onChange={handleOnChangeCreateOrg} value={savePayload.name} />
                     <Button onClick={handleOnSaveCreatedOrg} disabled={savePayload.name ? false : true}>Save</Button>
                 </div>
                 <div className={styles['content--row']}>
